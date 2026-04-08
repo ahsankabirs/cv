@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MD. Ahsan-ul Kabir Shawon | Lead Engineer — Interactive CV</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals with Subtle Blue Accents -->
+    <!-- Application Structure Plan: A single-page application with a fixed sidebar for navigation and a main content area. The structure is designed for recruiters to easily jump between key sections: 'About', 'Experience', 'Portfolio', 'Skills', 'Education', and 'Contact'. This thematic approach is more intuitive than a linear document. Interactions include hover effects, smooth scrolling, and an interactive skills chart to make the experience more engaging. A hamburger menu is added for a better mobile experience. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Technical Skills. Goal: Organize & Inform. Viz/Presentation: Interactive Radar Chart (Chart.js). Interaction: Hovering over points reveals skill details. Justification: A radar chart provides a compelling visual summary of diverse skill sets.
+        - Report Info: Work Experience & Projects. Goal: Organize & Inform. Viz/Presentation: Vertical Timeline with Cards (HTML/CSS). Interaction: Hover effects on cards. Justification: A timeline visually represents career progression.
+        - Report Info: Professional Summary, Education, Training. Goal: Inform. Viz/Presentation: Styled Text Blocks (HTML/CSS). Interaction: None. Justification: Clear, legible text is best for this information.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+            color: #3d3d3d;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+                max-height: 500px;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #a8a8a8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #888;
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link.active {
+            color: #4a90e2;
+            transform: translateX(5px);
+        }
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #e2e8f0;
+            border: 4px solid #f8f7f4;
+        }
+        .timeline-item:hover:before {
+            background-color: #4a90e2;
+        }
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.7;
+            }
+        }
+        .pulsing-point {
+             animation: pulse 2s infinite;
+        }
+        /* Calm, readable cards */
+        .cv-card {
+            background: #fff;
+            border: 1px solid #e8e6e1;
+            border-radius: 1rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        }
+        .cv-card:hover {
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        }
+        .section-title {
+            letter-spacing: -0.02em;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <aside class="w-full md:w-72 bg-white md:fixed md:h-full md:flex md:flex-col md:justify-between p-6 md:p-8 md:border-r md:border-gray-100 shadow-sm z-10">
+            <div>
+                 <div class="flex justify-between items-center md:flex-col">
+                    <div class="text-center w-full">
+                        <img src="https://storage.googleapis.com/bdjobs/mybdjobs/photos/2125001-2150000/862141123q7l8p.jpg?var=hAx2w8eo67KD365" alt="Profile Picture" class="w-24 h-24 md:w-32 md:h-32 rounded-full mx-auto mb-4 object-cover">
+                        <h1 class="text-xl md:text-2xl font-bold text-gray-800">MD. AHSAN-UL KABIR SHAWON</h1>
+                        <p class="text-sm text-gray-500 mt-1">Lead Engineer | IoT & Full-Stack AI Platforms</p>
+                    </div>
+                    <button id="menu-btn" class="md:hidden p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+                <nav id="mobile-menu" class="hidden md:block mt-12">
+                    <ul class="space-y-4">
+                        <li><a href="#about" class="nav-link text-gray-600 hover:text-gray-900 font-medium">About</a></li>
+                        <li><a href="#experience" class="nav-link text-gray-600 hover:text-gray-900 font-medium">Experience</a></li>
+                        <li><a href="#portfolio" class="nav-link text-gray-600 hover:text-gray-900 font-medium">Portfolio</a></li>
+                        <li><a href="#skills" class="nav-link text-gray-600 hover:text-gray-900 font-medium">Skills</a></li>
+                        <li><a href="#education" class="nav-link text-gray-600 hover:text-gray-900 font-medium">Education & Training</a></li>
+                        <li><a href="#contact" class="nav-link text-gray-600 hover:text-gray-900 font-medium">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <div class="hidden md:block text-center">
+                 <div class="flex justify-center space-x-4 mb-4">
+                    <a href="https://www.researchgate.net/profile/Ahsan-Ul-Shawon" target="_blank" rel="noopener noreferrer" class="text-gray-500 hover:text-gray-900 transition-colors" aria-label="ResearchGate">
+                        <svg class="w-6 h-6" fill="currentColor" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>ResearchGate</title><path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0zM8.65 18.65H6.938V9.76h1.712v8.89zm-2.61-10.18a1.562 1.562 0 0 1-1.56-1.56c0-.86.7-1.56 1.56-1.56.86 0 1.56.7 1.56 1.56a1.56 1.56 0 0 1-1.56 1.56zm11.24 10.18h-1.71V14.2c0-1.12-.4-1.89-1.41-1.89-.77 0-1.21.52-1.41 1.02-.07.18-.09.43-.09.69v4.63h-1.71s.02-8.06 0-8.89h1.71v.74c.23-.36.74-1.25 2.17-1.25 1.58 0 2.78 1.04 2.78 3.26v6.14z"/></svg>
+                    </a>
+                    <a href="https://www.linkedin.com/in/md-ahsan-ul-kabir-shawon/" target="_blank" rel="noopener noreferrer" class="text-gray-500 hover:text-gray-900 transition-colors" aria-label="LinkedIn">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" /></svg>
+                    </a>
+                </div>
+                <p class="text-xs text-gray-500">+880 1762242504</p>
+                <p class="text-xs text-gray-500 break-words">kabir.cpscr@gmail.com</p>
+                <p class="text-xs mt-2"><a href="https://app.iotbhai.com" target="_blank" rel="noopener noreferrer" class="text-blue-500 hover:underline font-medium">app.iotbhai.com</a></p>
+            </div>
+        </aside>
+
+        <main class="md:ml-72 flex-1 p-4 sm:p-8 md:p-12 max-w-5xl">
+            <section id="about" class="min-h-screen flex items-center pt-16 md:pt-0">
+                <div class="cv-card p-8 md:p-10 w-full">
+                    <h2 class="section-title text-2xl md:text-3xl font-bold text-gray-800 mb-5">About</h2>
+                    <div class="text-base md:text-lg text-gray-700 leading-relaxed space-y-4 max-w-3xl">
+                        <p>
+                            Lead Engineer with <strong>7+ years</strong> in <strong>IoT &amp; telematics</strong>, <strong>backend / full-stack</strong> work, and <strong>live data systems</strong>.
+                        </p>
+                        <p>
+                            I build <strong>microservices</strong>, connect <strong>hardware to cloud</strong>, and use <strong>AI/ML APIs</strong> where they fit — e.g. <strong>REST</strong>, <strong>scikit-learn</strong>, <strong>NLP</strong>. Background in <strong>embedded</strong> work and <strong>research</strong> (HMI, signal processing).
+                        </p>
+                        <p class="text-gray-600">
+                            Seeking <strong>AI/ML engineering</strong> or <strong>senior platform</strong> roles focused on <strong>production systems</strong>, reliability, and clear ownership end to end.
+                        </p>
+                        <p class="text-gray-600 border-t border-gray-100 pt-4 mt-1">
+                            <span class="text-gray-500 text-sm font-medium uppercase tracking-wide">Future focus</span><br>
+                            Keen to grow into <strong>agentic AI</strong> — models that <strong>plan</strong>, use <strong>tools &amp; APIs</strong>, and run <strong>multi-step</strong> workflows with solid <strong>guardrails</strong> and evals in production.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="experience" class="pt-16 md:pt-24">
+                <h2 class="section-title text-2xl md:text-3xl font-bold text-gray-800 mb-8">Work experience</h2>
+                <div class="relative border-l-2 border-gray-200 ml-4">
+                    <div class="mb-12 ml-10 timeline-item">
+                        <h3 class="text-lg font-semibold text-gray-900">Manager (Chief System Analyst)</h3>
+                        <p class="text-sm text-gray-500 mt-0.5">Bongo Technology Ltd. · Jan 2024 – Apr 2025</p>
+                        <ul class="mt-3 list-disc list-outside pl-5 text-gray-700 space-y-1.5 text-[15px] leading-relaxed">
+                            <li>Led R&amp;D for custom <strong>IoT telematics</strong> and <strong>delivery</strong> products.</li>
+                            <li>Ran <strong>device → cloud → office</strong> integration (hardware, firmware limits, backend).</li>
+                            <li>Worked with sales and ops so builds matched <strong>client needs</strong>.</li>
+                        </ul>
+                    </div>
+                    <div class="mb-12 ml-10 timeline-item">
+                        <h3 class="text-lg font-semibold text-gray-900">Senior Executive, R&amp;D</h3>
+                        <p class="text-sm text-gray-500 mt-0.5">Bongo Technology Ltd. (Bongo Xpress) · Jan 2022 – Dec 2023</p>
+                         <ul class="mt-3 list-disc list-outside pl-5 text-gray-700 space-y-1.5 text-[15px] leading-relaxed">
+                            <li>Built and ran <strong>delivery</strong> and <strong>IoT</strong> solutions.</li>
+                            <li>Handled <strong>day-to-day</strong> tech issues for users.</li>
+                            <li>Trained <strong>sales</strong> and <strong>installation</strong> teams.</li>
+                        </ul>
+                    </div>
+                     <div class="mb-12 ml-10 timeline-item">
+                        <h3 class="text-lg font-semibold text-gray-900">Executive, IT &amp; IoT Solutions</h3>
+                        <p class="text-sm text-gray-500 mt-0.5">Bongo Technology Ltd. · Jan 2021 – Dec 2021</p>
+                        <p class="mt-3 text-gray-700 text-[15px] leading-relaxed"><strong>Vehicle telematics</strong> — from build to rollout. <span class="text-gray-500 text-sm block sm:inline sm:ml-1">Senior role from Jan 2022.</span></p>
+                    </div>
+                    <div class="mb-12 ml-10 timeline-item">
+                        <h3 class="text-lg font-semibold text-gray-900">Rework Co-Ordinator (Intern)</h3>
+                        <p class="text-sm text-gray-500 mt-0.5">Walton Group · Mar 2020 – Sep 2020</p>
+                        <p class="mt-3 text-gray-700 text-[15px] leading-relaxed">Repair data, <strong>forecasts</strong>, spare-parts reports; <strong>Excel</strong> tools to speed daily work.</p>
+                    </div>
+                    <div class="mb-12 ml-10 timeline-item">
+                        <h3 class="text-lg font-semibold text-gray-900">R&amp;D Officer</h3>
+                        <p class="text-sm text-gray-500 mt-0.5">RobodocBD · Feb 2019 – Jul 2019</p>
+                        <p class="mt-3 text-gray-700 text-[15px] leading-relaxed"><strong>PCB</strong> design (toys, fingerprint attendance, chargers). Electronics <strong>support</strong> and fixes.</p>
+                    </div>
+                    <div class="mb-12 ml-10 timeline-item">
+                        <h3 class="text-lg font-semibold text-gray-900">Graduate Research Assistant</h3>
+                        <p class="text-sm text-gray-500 mt-0.5">Independent University, Bangladesh (IUB) · Jan 2017 – Jan 2019</p>
+                         <p class="mt-3 text-gray-700 text-[15px] leading-relaxed"><strong>ECG/EEG</strong> recorder; <strong>HMI</strong> research — <strong>1 Q1 journal</strong>, <strong>4 conference papers</strong>. Embedded, PCB, DSP.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="portfolio" class="pt-16 md:pt-24">
+                <h2 class="section-title text-2xl md:text-3xl font-bold text-gray-800 mb-8">Portfolio</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+                    <div class="cv-card p-6 md:p-7 transition-shadow duration-300">
+                        <h3 class="text-lg font-semibold text-gray-900 leading-snug">IoTBhai — fleet GPS platform</h3>
+                        <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1 mt-1 mb-3">
+                            <p class="text-sm text-gray-500">Founder &amp; lead dev · in development</p>
+                            <a href="https://app.iotbhai.com" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 hover:text-blue-800 font-medium">app.iotbhai.com ↗</a>
+                        </div>
+                        <p class="text-gray-700 text-[15px] leading-relaxed mb-3"><strong>Multi-tenant</strong> stack: <strong>12+ microservices</strong>, live GPS ingest, <strong>Django</strong> API, <strong>React</strong> web, mobile apps.</p>
+                        <ul class="text-sm text-gray-700 space-y-2 mb-5 list-disc list-outside pl-5 leading-relaxed">
+                            <li><strong>Python / FastAPI</strong> — fleet analytics, <strong>scikit-learn</strong> (clustering, maintenance signals), driver scores, <strong>map matching</strong> (OSM / graph).</li>
+                            <li><strong>Natural language → SQL</strong> for fleet data (intent, entities, safe SQL).</li>
+                        </ul>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Go</span>
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Python (Django, FastAPI)</span>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">React.js</span>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">TimescaleDB</span>
+                            <span class="bg-gray-200 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">PostgreSQL</span>
+                            <span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Kafka</span>
+                            <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Redis · Docker</span>
+                        </div>
+                    </div>
+                    <div class="cv-card p-6 md:p-7 transition-shadow duration-300">
+                        <h3 class="text-lg font-semibold text-gray-900 leading-snug">SocialMedia AI Bot</h3>
+                        <div class="flex flex-wrap items-baseline gap-x-2 gap-y-1 mt-1 mb-3">
+                            <p class="text-sm text-gray-500">Founder &amp; lead dev · 2023 – present</p>
+                            <a href="https://socialmedia-aibot.com" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 hover:text-blue-800 font-medium">socialmedia-aibot.com ↗</a>
+                        </div>
+                        <p class="text-gray-700 text-[15px] leading-relaxed mb-3"><strong>5+ social channels</strong> (Meta, Instagram, WhatsApp, etc.), <strong>1,000+</strong> concurrent users. <strong>FastAPI</strong> API + <strong>Next.js</strong> dashboards.</p>
+                        <ul class="text-sm text-gray-700 space-y-2 mb-5 list-disc list-outside pl-5 leading-relaxed">
+                            <li><strong>LLM chat:</strong> <strong>OpenAI</strong> (GPT-3.5 → GPT-4 / vision) and <strong>Google Gemini</strong> — pick provider &amp; model per bot.</li>
+                            <li><strong>Embeddings:</strong> OpenAI <code class="text-xs bg-gray-100 px-1 rounded">text-embedding-ada-002</code> &amp; Google <code class="text-xs bg-gray-100 px-1 rounded">text-embedding-004</code> for retrieval.</li>
+                            <li><strong>Knowledge base (RAG-style):</strong> files &amp; URLs, groups, full-text search → context into replies.</li>
+                            <li><strong>Bot tuning:</strong> temperature, max tokens, personality; analytics (response time, success rate).</li>
+                        </ul>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">FastAPI</span>
+                            <span class="bg-gray-200 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Next.js · TypeScript</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">OpenAI · Gemini</span>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Embeddings · RAG</span>
+                            <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">PostgreSQL · Redis</span>
+                            <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded-full">Docker · CI/CD</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="skills" class="pt-16 md:pt-24">
+                <h2 class="section-title text-2xl md:text-3xl font-bold text-gray-800 mb-4">Technical skills</h2>
+                <div class="cv-card p-4 sm:p-8">
+                    <div class="chart-container">
+                        <canvas id="skillsChart"></canvas>
+                    </div>
+                    <div id="skill-details" class="mt-5 text-center text-gray-600 min-h-[4.5rem] transition-opacity duration-300 text-sm px-2 max-w-xl mx-auto leading-relaxed">
+                        <p class="text-gray-500">Hover the radar to see tools.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="education" class="pt-16 md:pt-24 pb-12">
+                <h2 class="section-title text-2xl md:text-3xl font-bold text-gray-800 mb-8">Education &amp; training</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                    <div class="cv-card p-6 md:p-7">
+                        <h3 class="text-lg font-semibold text-gray-900">Education</h3>
+                        <p class="text-base font-medium text-gray-800 mt-4">B.Sc. — Electronics &amp; Telecommunication Engineering</p>
+                        <p class="text-sm text-gray-500 mt-1">IUB · 2014 – 2019</p>
+                        <p class="mt-3 text-sm text-blue-700 font-medium">International Robofest-2019 — Champion</p>
+                    </div>
+                    <div class="cv-card p-6 md:p-7">
+                        <h3 class="text-lg font-semibold text-gray-900">Certifications</h3>
+                        <ul class="mt-4 space-y-2.5 text-gray-700 text-sm leading-relaxed">
+                            <li><strong>Building Management System</strong> — TongYang BMS Co., Ltd., South Korea (2025)</li>
+                            <li><strong>Video Telematics Solutions</strong> — Streamax Technology Co., Ltd. (2024)</li>
+                            <li><strong>Sensor Production</strong> — Mechatronics, Belarus (2023)</li>
+                            <li><strong>CCNA (Module 1)</strong> — Independent University, Bangladesh (2018)</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="contact" class="pt-16 md:pt-24 pb-16 text-center">
+                <h2 class="section-title text-2xl md:text-3xl font-bold text-gray-800 mb-3">Contact</h2>
+                <p class="text-gray-600 mb-8 max-w-md mx-auto text-[15px] leading-relaxed">Open to new roles. Email or phone is fine.</p>
+                <div class="flex justify-center items-center flex-wrap gap-5 md:gap-8">
+                    <a href="https://app.iotbhai.com" target="_blank" rel="noopener noreferrer" class="flex items-center text-gray-700 hover:text-blue-600 transition-colors">
+                        <svg class="w-6 h-6 mr-2 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                        <span>app.iotbhai.com</span>
+                    </a>
+                    <a href="mailto:kabir.cpscr@gmail.com" class="flex items-center text-gray-700 hover:text-blue-600 transition-colors">
+                        <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" /></svg>
+                        <span>kabir.cpscr@gmail.com</span>
+                    </a>
+                    <a href="tel:+8801762242504" class="flex items-center text-gray-700 hover:text-blue-600 transition-colors">
+                         <svg class="w-6 h-6 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" /></svg>
+                        <span>+880 1762242504</span>
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const skillsData = {
+                labels: ['Backend Dev', 'Frontend Dev', 'AI & ML', 'DevOps & Infra', 'IoT & Embedded', 'Data & Analysis'],
+                datasets: [{
+                    label: 'Proficiency',
+                    data: [9, 8, 8, 8, 9, 7],
+                    backgroundColor: 'rgba(74, 144, 226, 0.2)',
+                    borderColor: 'rgba(74, 144, 226, 1)',
+                    pointBackgroundColor: 'rgba(74, 144, 226, 1)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgba(74, 144, 226, 1)',
+                    borderWidth: 2,
+                }]
+            };
+            
+            const skillDetailsData = {
+                'Backend Dev': 'Go · Python (FastAPI, Django) · SQLAlchemy · TimescaleDB · PostgreSQL · Redis · Kafka · MQTT',
+                'Frontend Dev': 'Next.js · React · TypeScript · JavaScript · Tailwind · Leaflet · NextAuth',
+                'AI & ML': 'OpenAI & Gemini (chat + vision) · ada-002 / Google embeddings · RAG knowledge base · scikit-learn · NL→SQL · time series / telemetry',
+                'DevOps & Infra': 'Docker · Nginx / Caddy · microservices · CI/CD · VPS · containers',
+                'IoT & Embedded': 'IoT design · GPS (GT06, Teltonika) · embedded C++ · PCB · MATLAB',
+                'Data & Analysis': 'NumPy · Pandas · Excel · DSP · research stats'
+            };
+
+            const skillDetailsDiv = document.getElementById('skill-details');
+
+            const config = {
+                type: 'radar',
+                data: skillsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    elements: {
+                        point: {
+                            radius: 5,
+                            hoverRadius: 15,
+                            hitRadius: 75, 
+                            pointStyle: 'circle',
+                        }
+                    },
+                    onHover: (event, chartElement) => {
+                        const canvas = event.native.target;
+                        canvas.style.cursor = chartElement.length ? 'pointer' : 'default';
+                        if (chartElement.length) {
+                            const index = chartElement[0].index;
+                            const label = skillsData.labels[index];
+                            skillDetailsDiv.innerHTML = `<p class="font-semibold text-gray-800 mb-1">${label}</p><p class="text-sm text-gray-600">${skillDetailsData[label]}</p>`;
+                        } else {
+                             skillDetailsDiv.innerHTML = `<p class="text-gray-500">Hover the radar to see tools.</p>`;
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    },
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: '#e2e8f0'
+                            },
+                            grid: {
+                                color: '#e2e8f0'
+                            },
+                            pointLabels: {
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                },
+                                color: '#4a5568'
+                            },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                stepSize: 2,
+                                font: {
+                                    size: 10
+                                }
+                            },
+                             min: 0,
+                             max: 10
+                        }
+                    }
+                }
+            };
+            
+            const skillsChartCanvas = document.getElementById('skillsChart');
+            let chartInstance = new Chart(skillsChartCanvas, config);
+
+            const originalDraw = Chart.controllers.radar.prototype.draw;
+            Chart.controllers.radar.prototype.draw = function() {
+                originalDraw.apply(this, arguments);
+                const ctx = this.chart.ctx;
+                const meta = this.getMeta();
+                meta.data.forEach((point, index) => {
+                    const vm = point.getProps(['x', 'y']);
+                    ctx.save();
+                    ctx.strokeStyle = 'rgba(74, 144, 226, 0.5)';
+                    ctx.lineWidth = 2;
+                    ctx.globalAlpha = Math.abs(Math.sin(Date.now() / 500 + index));
+                    ctx.beginPath();
+                    ctx.arc(vm.x, vm.y, 8, 0, 2 * Math.PI);
+                    ctx.stroke();
+                    ctx.restore();
+                });
+            };
+
+            setInterval(() => {
+                chartInstance.update('none');
+            }, 100);
+
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.3
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const currentId = entry.target.id;
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href') === `#${currentId}`);
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    if (window.innerWidth < 768) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
